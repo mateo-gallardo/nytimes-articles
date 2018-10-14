@@ -4,10 +4,7 @@ import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 
 @Entity
-data class Article(@PrimaryKey val id: String,
-                   val title: String,
-                   val wordCount: Int,
-                   val byteArray: ByteArray) {
+data class Article(@PrimaryKey val id: String, val title: String, val wordCount: Int, val imageUrl: String?) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
