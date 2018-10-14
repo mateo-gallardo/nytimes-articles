@@ -2,6 +2,7 @@ package com.mateogallardo.nytimesarticles.data.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import com.mateogallardo.nytimesarticles.DbWorkerThread
 import com.mateogallardo.nytimesarticles.data.api.ArticlesApiResponse
 import com.mateogallardo.nytimesarticles.data.api.Multimedia
 import com.mateogallardo.nytimesarticles.data.api.NYTimesApi
@@ -17,8 +18,13 @@ import retrofit2.Response
 const val BASE_URL: String = "https://api.nytimes.com/svc/search/v2/"
 
 class ArticleRepository(private val articleDao: ArticleDao) {
-    val articleList = mutableListOf<Article>()
-    val articles = MutableLiveData<List<Article>>()
+    private val articleList = mutableListOf<Article>()
+    private val articlesInfo = MutableLiveData<ArticlesInfo>()
+    private val dbWorkerThread: DbWorkerThread = DbWorkerThread("dbWorkerThread")
+
+    init {
+        dbWorkerThread.start()
+    }
 
     fun addArticle(article: Article) {
         articleDao.addArticle(article)
@@ -28,7 +34,7 @@ class ArticleRepository(private val articleDao: ArticleDao) {
         articles.forEach { article -> addArticle(article) }
     }
 
-    fun getArticles(): LiveData<List<Article>> {
+    fun getArticles(): LiveData<ArticlesInfo> {
         val httpClient = OkHttpClient.Builder()
         val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -47,16 +53,23 @@ class ArticleRepository(private val articleDao: ArticleDao) {
                     articleList.add(article)
                 }
 
-                articles.value = articleList
-                articleList.forEach { article -> articleDao.addArticle(article) }
+                articlesInfo.value = ArticlesInfo(articleList)
+                val task = Runnable {
+                    addArticles(articleList)
+                }
+                dbWorkerThread.postTask(task)
             }
 
             override fun onFailure(call: Call<ArticlesApiResponse>, throwable: Throwable) {
-                articles.value = articleDao.getArticles().value
+                val task = Runnable {
+                    val newArticlesInfo = ArticlesInfo(articleDao.getArticles(), true)
+                    articlesInfo.postValue(newArticlesInfo)
+                }
+                dbWorkerThread.postTask(task)
             }
         })
 
-        return articles
+        return articlesInfo
     }
 
     private fun getImageUrl(multimediaArray: Array<Multimedia>): String? {

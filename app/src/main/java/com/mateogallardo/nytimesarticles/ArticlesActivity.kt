@@ -5,13 +5,12 @@ import android.view.View
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
-import com.mateogallardo.nytimesarticles.data.database.DummyArticleDao
 import com.mateogallardo.nytimesarticles.data.model.Article
-import com.mateogallardo.nytimesarticles.data.repository.ArticleRepository
 import com.mateogallardo.nytimesarticles.viewmodel.ArticleViewModel
 import kotlinx.android.synthetic.main.activity_articles.*
 import android.view.Menu
 import android.view.MenuItem
+import com.mateogallardo.nytimesarticles.data.repository.ArticleRepository
 
 class ArticlesActivity : AppCompatActivity() {
     private val adapterArticles: MutableList<Article> = mutableListOf()
@@ -22,13 +21,34 @@ class ArticlesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_articles)
         articles_list.layoutManager = LinearLayoutManager(this)
         articles_list.adapter = ArticlesAdapter(adapterArticles)
+        connection_error.visibility = View.GONE
 
-        viewModel = ArticleViewModel(ArticleRepository(DummyArticleDao()))
-        viewModel?.getArticles()?.observe(this, Observer { articles ->
-            adapterArticles.clear()
-            adapterArticles.addAll(articles!!)
+        viewModel = ArticleViewModel(ArticleRepository(Injector.getDatabaseImplementation(this).getArticleDao()))
+        viewModel?.getArticles()?.observe(this, Observer { articlesInfo ->
+            if (articlesInfo?.articles != null) {
+                sortArticles(articlesInfo.articles)
+                adapterArticles.clear()
+                adapterArticles.addAll(articlesInfo.articles)
+            }
+
+            if (articlesInfo?.requestError!!) {
+                connection_error.visibility = View.VISIBLE
+            } else {
+                connection_error.visibility = View.GONE
+            }
+
             articles_list.adapter.notifyDataSetChanged()
             progress_bar.visibility = View.GONE
+        })
+    }
+
+    private fun sortArticles(articles: List<Article>) {
+        articles.sortedWith(Comparator{ a1, a2 ->
+            if (a1.id > a2.id) {
+                return@Comparator 1
+            } else {
+                return@Comparator -1
+            }
         })
     }
 

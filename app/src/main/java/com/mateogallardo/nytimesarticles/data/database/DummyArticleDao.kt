@@ -1,6 +1,5 @@
 package com.mateogallardo.nytimesarticles.data.database
 
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.mateogallardo.nytimesarticles.data.model.Article
 
@@ -17,5 +16,5 @@ class DummyArticleDao : ArticleDao {
         articles.value = articleList
     }
 
-    override fun getArticles() = articles as LiveData<List<Article>>
+    override fun getArticles() = articles.value!!
 }

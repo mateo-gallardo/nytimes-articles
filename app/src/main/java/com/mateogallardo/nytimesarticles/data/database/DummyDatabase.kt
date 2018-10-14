@@ -1,5 +1,10 @@
 package com.mateogallardo.nytimesarticles.data.database
 
 class DummyDatabase : Database {
-    override val articleDao: ArticleDao = DummyArticleDao()
+
+    private val articleDao: ArticleDao = DummyArticleDao()
+
+    override fun getArticleDao(): ArticleDao {
+        return articleDao
+    }
 }

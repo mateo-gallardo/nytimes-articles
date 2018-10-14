@@ -14,6 +14,14 @@
         android:layout_marginTop="-6dp"
         android:indeterminate="true" />
 
+    <TextView
+        android:id="@+id/connection_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:gravity="center"
+        android:text="An error occurred while requesting the latest articles. Make sure you have an internet connection."/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/articles_list"
         android:layout_width="match_parent"
