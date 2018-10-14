@@ -20,10 +20,6 @@ class ArticleRepository(private val articleDao: ArticleDao) {
     val articleList = mutableListOf<Article>()
     val articles = MutableLiveData<List<Article>>()
 
-    init {
-        articles.value = articleList
-    }
-
     fun addArticle(article: Article) {
         articleDao.addArticle(article)
     }
