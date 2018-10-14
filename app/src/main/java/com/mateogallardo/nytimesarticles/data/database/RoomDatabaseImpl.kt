@@ -10,13 +10,17 @@ import com.mateogallardo.nytimesarticles.data.model.Article
 abstract class RoomDatabaseImpl : RoomDatabase(), com.mateogallardo.nytimesarticles.data.database.Database {
     abstract override fun getArticleDao(): ArticleDao
 
+    override fun closeConnection() {
+        INSTANCE?.close()
+    }
+
     companion object {
         private var INSTANCE: RoomDatabaseImpl? = null
 
         fun getInstance(context: Context): RoomDatabaseImpl? {
             if (INSTANCE == null) {
                 synchronized(RoomDatabaseImpl::class) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                    INSTANCE = Room.databaseBuilder(context.applicationContext,
                             RoomDatabaseImpl::class.java, "weather.db")
                             .build()
                 }

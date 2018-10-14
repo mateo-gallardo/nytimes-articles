@@ -12,7 +12,7 @@ data class Article(@PrimaryKey val id: String, val title: String, val wordCount:
 
         other as Article
 
-        return id != other.id
+        return id == other.id
     }
 
     override fun hashCode(): Int {

@@ -84,4 +84,9 @@ class ArticleRepository(private val articleDao: ArticleDao) {
 
         return imageUrl
     }
+
+    fun onDrestroy() {
+
+        dbWorkerThread.quit()
+    }
 }

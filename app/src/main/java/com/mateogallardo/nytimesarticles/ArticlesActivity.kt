@@ -15,6 +15,7 @@ import com.mateogallardo.nytimesarticles.data.repository.ArticleRepository
 class ArticlesActivity : AppCompatActivity() {
     private val adapterArticles: MutableList<Article> = mutableListOf()
     private var viewModel: ArticleViewModel? = null
+    private var articleRepository: ArticleRepository? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +24,8 @@ class ArticlesActivity : AppCompatActivity() {
         articles_list.adapter = ArticlesAdapter(adapterArticles)
         connection_error.visibility = View.GONE
 
-        viewModel = ArticleViewModel(ArticleRepository(Injector.getDatabaseImplementation(this).getArticleDao()))
+        articleRepository = ArticleRepository(Injector.getDatabaseImplementation(this).getArticleDao())
+        viewModel = ArticleViewModel(articleRepository!!)
         viewModel?.getArticles()?.observe(this, Observer { articlesInfo ->
             if (articlesInfo?.articles != null) {
                 sortArticles(articlesInfo.articles)
@@ -64,5 +66,11 @@ class ArticlesActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        Injector.getDatabaseImplementation(this).closeConnection()
+        articleRepository?.onDrestroy()
+        super.onDestroy()
     }
 }
