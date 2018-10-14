@@ -11,25 +11,19 @@ abstract class RoomDatabaseImpl : RoomDatabase(), com.mateogallardo.nytimesartic
     abstract override fun getArticleDao(): ArticleDao
 
     override fun closeConnection() {
-        INSTANCE?.close()
+        instance?.close()
+        instance = null
     }
 
     companion object {
-        private var INSTANCE: RoomDatabaseImpl? = null
+        @Volatile
+        private var instance: RoomDatabaseImpl? = null
 
-        fun getInstance(context: Context): RoomDatabaseImpl? {
-            if (INSTANCE == null) {
-                synchronized(RoomDatabaseImpl::class) {
-                    INSTANCE = Room.databaseBuilder(context.applicationContext,
-                            RoomDatabaseImpl::class.java, "weather.db")
-                            .build()
-                }
+        fun getInstance(context: Context): RoomDatabaseImpl? =
+            instance ?: synchronized(this) {
+                instance ?: Room.databaseBuilder(context.applicationContext,
+                        RoomDatabaseImpl::class.java, "weather.db")
+                        .build().also { instance = it }
             }
-            return INSTANCE
-        }
-
-        fun destroyInstance() {
-            INSTANCE = null
-        }
     }
 }

@@ -23,8 +23,10 @@ class ArticlesActivity : AppCompatActivity() {
         articles_list.layoutManager = LinearLayoutManager(this)
         articles_list.adapter = ArticlesAdapter(adapterArticles)
         connection_error.visibility = View.GONE
+        val db = Injector.getDatabaseImplementation(this)
+        val httpService = Injector.getHttpService(this)
 
-        articleRepository = ArticleRepository(Injector.getDatabaseImplementation(this).getArticleDao())
+        articleRepository = ArticleRepository.getInstance(db.getArticleDao(), httpService)
         viewModel = ArticleViewModel(articleRepository!!)
         viewModel?.getArticles()?.observe(this, Observer { articlesInfo ->
             if (articlesInfo?.articles != null) {
@@ -70,7 +72,7 @@ class ArticlesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         Injector.getDatabaseImplementation(this).closeConnection()
-        articleRepository?.onDrestroy()
+        articleRepository?.onDestroy()
         super.onDestroy()
     }
 }

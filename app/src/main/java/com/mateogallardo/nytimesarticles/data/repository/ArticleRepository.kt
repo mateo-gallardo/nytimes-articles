@@ -3,27 +3,27 @@ package com.mateogallardo.nytimesarticles.data.repository
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import com.mateogallardo.nytimesarticles.DbWorkerThread
-import com.mateogallardo.nytimesarticles.data.api.ArticlesApiResponse
-import com.mateogallardo.nytimesarticles.data.api.Multimedia
-import com.mateogallardo.nytimesarticles.data.api.NYTimesApi
+import com.mateogallardo.nytimesarticles.data.api.*
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
 import com.mateogallardo.nytimesarticles.data.model.Article
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import okhttp3.OkHttpClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-const val BASE_URL: String = "https://api.nytimes.com/svc/search/v2/"
-
-class ArticleRepository(private val articleDao: ArticleDao) {
+class ArticleRepository private constructor(private val articleDao: ArticleDao, private val httpService: HttpService) {
     private val articleList = mutableListOf<Article>()
     private val articlesInfo = MutableLiveData<ArticlesInfo>()
     private val dbWorkerThread: DbWorkerThread = DbWorkerThread("dbWorkerThread")
 
     init {
         dbWorkerThread.start()
+    }
+
+    companion object {
+        @Volatile
+        private var instance: ArticleRepository? = null
+
+        fun getInstance(articleDao: ArticleDao, httpService: HttpService): ArticleRepository? =
+            instance ?: synchronized(this) {
+                instance ?: ArticleRepository(articleDao, httpService).also { instance = it }
+            }
     }
 
     fun addArticle(article: Article) {
@@ -35,20 +35,10 @@ class ArticleRepository(private val articleDao: ArticleDao) {
     }
 
     fun getArticles(): LiveData<ArticlesInfo> {
-        val httpClient = OkHttpClient.Builder()
-        val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .client(httpClient.build())
-                .build()
-
-        val service = retrofit.create(NYTimesApi::class.java)
-        val callAsync: Call<ArticlesApiResponse> = service.getArticles()
-        callAsync.enqueue(object : Callback<ArticlesApiResponse> {
-            override fun onResponse(call: Call<ArticlesApiResponse>, response: Response<ArticlesApiResponse>) {
-                val articlesResponse: ArticlesApiResponse? = response.body()
+        httpService.getArticles(object : HttpService.Callback {
+            override fun onSuccess(articlesApiResponse: ArticlesApiResponse) {
                 articleList.clear()
-                articlesResponse?.response?.docs?.forEach {
+                articlesApiResponse?.response?.docs?.forEach {
                     val article = Article(it._id, it.headline.main, it.word_count, getImageUrl(it.multimedia))
                     articleList.add(article)
                 }
@@ -60,7 +50,7 @@ class ArticleRepository(private val articleDao: ArticleDao) {
                 dbWorkerThread.postTask(task)
             }
 
-            override fun onFailure(call: Call<ArticlesApiResponse>, throwable: Throwable) {
+            override fun onError(errorMessage: String) {
                 val task = Runnable {
                     val newArticlesInfo = ArticlesInfo(articleDao.getArticles(), true)
                     articlesInfo.postValue(newArticlesInfo)
@@ -85,8 +75,7 @@ class ArticleRepository(private val articleDao: ArticleDao) {
         return imageUrl
     }
 
-    fun onDrestroy() {
-
+    fun onDestroy() {
         dbWorkerThread.quit()
     }
 }
