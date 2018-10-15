@@ -14,5 +14,6 @@ Notes:
 - [ ] Decouple repository from DB threading, it shouldn't know that DB needs to be called in a different thread
 - [ ] Get Kodein to work for dependency injection and remove Injector class
 - [ ] Use Mockito to mock the observer in the tests
+- [ ] Add pagination with infinite scroll to the articles list
 - [ ] Save the images either to the DB or the filesystem, instead of relying solely on Picasso
 - [ ] Set a min latency for the DB query, so the screen isn't updated too quickly
