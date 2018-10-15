@@ -23,18 +23,18 @@ class ArticleRepositoryTest {
         val context = InstrumentationRegistry.getTargetContext()
         db = Injector.getDatabaseImplementation(context, true)
         articleDao = db?.getArticleDao()
-        httpService = Injector.getHttpService(InstrumentationRegistry.getInstrumentation().context)
+        httpService = Injector.getHttpService(InstrumentationRegistry.getInstrumentation().context, true)
     }
 
     @Test
     fun shouldAddArticleSuccessfully() {
         val article = TestsHelper.createArticle()
         val articleRepository = ArticleRepository.getInstance(articleDao!!, httpService!!)
+        articleRepository?.addArticle(article)
         val observer = Observer<ArticlesInfo> {
             //Stub
         }
         articleRepository?.getArticles()?.observeForever(observer)
-        articleRepository?.addArticle(article)
 
         assert(articleRepository?.getArticles()?.value?.articles?.contains(article)!!)
     }
