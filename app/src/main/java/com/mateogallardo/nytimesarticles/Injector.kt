@@ -3,8 +3,8 @@ package com.mateogallardo.nytimesarticles
 import android.arch.persistence.room.Room
 import android.content.Context
 import com.mateogallardo.nytimesarticles.data.api.HttpService
-import com.mateogallardo.nytimesarticles.data.api.HttpServiceMock
-import com.mateogallardo.nytimesarticles.data.api.RetrofitHttpService
+import com.mateogallardo.nytimesarticles.data.api.stub.HttpServicesStub
+import com.mateogallardo.nytimesarticles.data.api.retrofit.RetrofitHttpService
 import com.mateogallardo.nytimesarticles.data.database.Database
 import com.mateogallardo.nytimesarticles.data.database.RoomDatabaseImpl
 
@@ -20,7 +20,7 @@ class Injector {
 
         fun getHttpService(context: Context? = null, testMode: Boolean = false): HttpService {
             return if (testMode) {
-                HttpServiceMock(context!!)
+                HttpServicesStub(context!!)
             } else {
                 RetrofitHttpService()
             }

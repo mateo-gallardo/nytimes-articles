@@ -1,4 +1,4 @@
-package com.mateogallardo.nytimesarticles
+package com.mateogallardo.nytimesarticles.data.database
 
 import android.os.Handler
 import android.os.HandlerThread

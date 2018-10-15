@@ -2,7 +2,7 @@ package com.mateogallardo.nytimesarticles.data.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import com.mateogallardo.nytimesarticles.DbWorkerThread
+import com.mateogallardo.nytimesarticles.data.database.DbWorkerThread
 import com.mateogallardo.nytimesarticles.data.api.*
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
 import com.mateogallardo.nytimesarticles.data.model.Article

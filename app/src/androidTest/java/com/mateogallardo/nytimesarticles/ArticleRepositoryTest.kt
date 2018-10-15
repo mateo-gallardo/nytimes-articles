@@ -1,10 +1,7 @@
 package com.mateogallardo.nytimesarticles
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
 import android.support.test.InstrumentationRegistry
 import com.mateogallardo.nytimesarticles.data.api.HttpService
-import com.mateogallardo.nytimesarticles.data.api.HttpServiceMock
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
 import com.mateogallardo.nytimesarticles.data.database.Database
 import com.mateogallardo.nytimesarticles.data.repository.ArticleRepository

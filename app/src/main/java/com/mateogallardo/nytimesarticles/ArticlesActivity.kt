@@ -23,6 +23,10 @@ class ArticlesActivity : AppCompatActivity() {
         articles_list.layoutManager = LinearLayoutManager(this)
         articles_list.adapter = ArticlesAdapter(adapterArticles)
         connection_error.visibility = View.GONE
+        initializeViewModel()
+    }
+
+    fun initializeViewModel() {
         val db = Injector.getDatabaseImplementation(this)
         val httpService = Injector.getHttpService(this)
 
