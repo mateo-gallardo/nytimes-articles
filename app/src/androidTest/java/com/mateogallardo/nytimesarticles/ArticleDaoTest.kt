@@ -32,11 +32,7 @@ class ArticleDaoTest {
 
     @Test
     fun shouldAddArticleSuccessfully() {
-        val id = "1"
-        val title = "Article Title"
-        val wordCount = 246
-        val imageUrl = "/image/url"
-        val article = Article(id, title, wordCount, imageUrl)
+        val article = TestsHelper.createArticle()
 
         articleDao?.addArticle(article)
         Assert.assertTrue(articleDao?.getArticles()!!.contains(article))
