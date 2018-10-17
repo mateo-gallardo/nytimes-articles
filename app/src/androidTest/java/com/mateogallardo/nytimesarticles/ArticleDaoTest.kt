@@ -2,14 +2,11 @@ package com.mateogallardo.nytimesarticles
 
 import android.support.test.runner.AndroidJUnit4
 import com.mateogallardo.nytimesarticles.data.database.Database
-import com.mateogallardo.nytimesarticles.data.model.Article
-import org.junit.Assert
-import org.junit.Test
 import org.junit.runner.RunWith
 import android.support.test.InstrumentationRegistry
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
-import org.junit.Before
-import org.junit.After
+import junit.framework.Assert.assertTrue
+import org.junit.*
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -33,9 +30,8 @@ class ArticleDaoTest {
     @Test
     fun shouldAddArticleSuccessfully() {
         val article = TestsHelper.createArticle()
-
         articleDao?.addArticle(article)
-        Assert.assertTrue(articleDao?.getArticles()!!.contains(article))
+        assertTrue(TestsHelper.getLiveDataValue(articleDao?.getArticles()!!).contains(article))
     }
 }
 

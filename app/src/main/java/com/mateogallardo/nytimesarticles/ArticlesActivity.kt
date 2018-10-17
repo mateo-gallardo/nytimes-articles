@@ -76,7 +76,6 @@ class ArticlesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         Injector.getDatabaseImplementation(this).closeConnection()
-        articleRepository?.onDestroy()
         super.onDestroy()
     }
 }

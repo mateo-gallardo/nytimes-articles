@@ -1,13 +1,12 @@
 package com.mateogallardo.nytimesarticles
 
-import android.arch.lifecycle.Observer
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.mateogallardo.nytimesarticles.data.api.HttpService
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
 import com.mateogallardo.nytimesarticles.data.database.Database
 import com.mateogallardo.nytimesarticles.data.repository.ArticleRepository
-import com.mateogallardo.nytimesarticles.data.repository.ArticlesInfo
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,11 +30,6 @@ class ArticleRepositoryTest {
         val article = TestsHelper.createArticle()
         val articleRepository = ArticleRepository.getInstance(articleDao!!, httpService!!)
         articleRepository?.addArticle(article)
-        val observer = Observer<ArticlesInfo> {
-            //Stub
-        }
-        articleRepository?.getArticles()?.observeForever(observer)
-
-        assert(articleRepository?.getArticles()?.value?.articles?.contains(article)!!)
+        assertTrue(TestsHelper.getLiveDataValue(articleRepository?.getArticles()!!).articles.contains(article))
     }
 }

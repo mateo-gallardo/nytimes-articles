@@ -8,7 +8,11 @@ import com.mateogallardo.nytimesarticles.data.model.Article
 
 @Database(entities = [Article::class], version = 1, exportSchema = false)
 abstract class RoomDatabaseImpl : RoomDatabase(), com.mateogallardo.nytimesarticles.data.database.Database {
-    abstract override fun getArticleDao(): ArticleDao
+    override fun getArticleDao(): ArticleDao {
+        return RoomArticleDao.getInstance(getRoomArticleDao())!!
+    }
+
+    abstract fun getRoomArticleDao(): ArticleDao
 
     override fun closeConnection() {
         instance?.close()

@@ -2,19 +2,15 @@ package com.mateogallardo.nytimesarticles.data.repository
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
-import com.mateogallardo.nytimesarticles.data.database.DbWorkerThread
+import android.arch.lifecycle.Observer
 import com.mateogallardo.nytimesarticles.data.api.*
 import com.mateogallardo.nytimesarticles.data.database.ArticleDao
 import com.mateogallardo.nytimesarticles.data.model.Article
+import com.mateogallardo.nytimesarticles.observeOnce
 
 class ArticleRepository private constructor(private val articleDao: ArticleDao, private val httpService: HttpService) {
     private val articleList = mutableListOf<Article>()
     private val articlesInfo = MutableLiveData<ArticlesInfo>()
-    private val dbWorkerThread: DbWorkerThread = DbWorkerThread("dbWorkerThread")
-
-    init {
-        dbWorkerThread.start()
-    }
 
     companion object {
         @Volatile
@@ -38,24 +34,19 @@ class ArticleRepository private constructor(private val articleDao: ArticleDao, 
         httpService.getArticles(object : HttpService.Callback {
             override fun onSuccess(articlesApiResponse: ArticlesApiResponse) {
                 articleList.clear()
-                articlesApiResponse?.response?.docs?.forEach {
+                articlesApiResponse.response.docs.forEach {
                     val article = Article(it._id, it.headline.main, it.word_count, getImageUrl(it.multimedia))
                     articleList.add(article)
                 }
 
                 articlesInfo.value = ArticlesInfo(articleList)
-                val task = Runnable {
-                    addArticles(articleList)
-                }
-                dbWorkerThread.postTask(task)
+                addArticles(articleList)
             }
 
             override fun onError(errorMessage: String) {
-                val task = Runnable {
-                    val newArticlesInfo = ArticlesInfo(articleDao.getArticles(), true)
-                    articlesInfo.postValue(newArticlesInfo)
-                }
-                dbWorkerThread.postTask(task)
+                articleDao.getArticles().observeOnce(Observer { articles ->
+                    articlesInfo.postValue(ArticlesInfo(articles!!, true))
+                })
             }
         })
 
@@ -73,9 +64,5 @@ class ArticleRepository private constructor(private val articleDao: ArticleDao, 
         }
 
         return imageUrl
-    }
-
-    fun onDestroy() {
-        dbWorkerThread.quit()
     }
 }

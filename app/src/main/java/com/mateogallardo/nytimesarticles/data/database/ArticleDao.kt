@@ -13,5 +13,5 @@ interface ArticleDao {
     fun addArticle(article: Article)
 
     @Query("SELECT * FROM Article")
-    fun getArticles(): List<Article>
+    fun getArticles(): LiveData<List<Article>>
 }
